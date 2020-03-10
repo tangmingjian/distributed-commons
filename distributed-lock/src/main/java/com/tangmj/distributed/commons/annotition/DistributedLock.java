@@ -24,16 +24,9 @@ public @interface DistributedLock {
     String key();
 
     /**
-     * 锁过期时间
-     *
+     * 获锁等待时间
      * @return
      */
-    long expirationSeconds() default 60;
+    long waitTimeSeconds() default 0L;
 
-    /**
-     * 是否续租
-     *
-     * @return
-     */
-    boolean relet() default true;
 }

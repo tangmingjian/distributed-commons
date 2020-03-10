@@ -15,6 +15,7 @@
 
     <properties>
         <curator-recipes-version>4.0.1</curator-recipes-version>
+        <redisson-version>3.11.0</redisson-version>
     </properties>
 
     <dependencies>
@@ -34,6 +35,18 @@
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>
             <version>${curator-recipes-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+            <version>${redisson-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

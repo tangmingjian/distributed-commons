@@ -1,6 +1,5 @@
 package com.tangmj.distributed.commons.aspect;
 
-import com.tangmj.distributed.commons.LockService;
 import com.tangmj.distributed.commons.annotition.DistributedLock;
 import com.tangmj.distributed.commons.exceptions.LockException;
 import com.tangmj.distributed.commons.exceptions.UnLockException;
@@ -10,7 +9,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -19,7 +17,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.lang.reflect.Method;
-import java.util.UUID;
 
 /**
  * @author tangmingjian 2019-12-18 下午4:09
@@ -27,10 +24,7 @@ import java.util.UUID;
 @Aspect
 @Slf4j
 @Order(Integer.MIN_VALUE)
-public class DistributedLockAspect {
-
-    @Autowired
-    private LockService lockService;
+public abstract class DistributedLockAspect<Lock> {
 
     @Pointcut("@annotation(com.tangmj.distributed.commons.annotition.DistributedLock)")
     public void pointcut() {
@@ -52,31 +46,49 @@ public class DistributedLockAspect {
             context.setVariable(parameterNames[i], args[i]);
         }
         final Object value = expression.getValue(context);
-        String lockKey = prefix.concat(String.valueOf(value));
-        if (lockKey == null) {
+        String lockName = prefix.concat(String.valueOf(value));
+        if (lockName == null) {
             log.error("加锁key值为空");
             throw new LockException("加锁key值为空");
         }
-        String uuid = UUID.randomUUID().toString();
-        final boolean locked = lockService.addLock(lockKey, uuid, lockAnnotation.expirationSeconds(), lockAnnotation.relet());
-        log.info("加锁key:[{}]结果:[{}]", lockKey, locked ? "成功" : "失败");
-        if (!locked) {
-            log.error("加锁key:[{}]失败", lockKey);
-            throw new LockException("加锁失败key:".concat(lockKey));
-        }
-        Object result;
+        final long waitTime = lockAnnotation.waitTimeSeconds();
+
+        Lock lock = null;
+        boolean locked = false;
         try {
+            lock = getLock(lockName);
+            if (waitTime == 0) {
+                locked = tryLock(lock);
+            } else {
+                locked = tryLock(lock, waitTime);
+            }
+
+            log.info("加锁key:[{}]结果:[{}]", lockName, locked ? "成功" : "失败");
+            if (!locked) {
+                log.error("加锁key:[{}]失败", lockName);
+                throw new LockException("加锁失败key:".concat(lockName));
+            }
             //执行业务逻辑
-            result = pjp.proceed();
+            return pjp.proceed();
         } finally {
-            //释放锁
-            final boolean unLock = lockService.unLock(lockKey, uuid);
-            log.info("解锁key:[{}]结果:[{}]", lockKey, unLock ? "成功" : "失败");
-            if (!unLock) {
-                log.error("解锁key:[{}]失败", lockKey);
-                throw new UnLockException("解锁失败key:".concat(lockKey));
+            if (locked) {
+                //释放锁
+                final boolean unLock = unLock(lock);
+                log.info("解锁key:[{}]结果:[{}]", lockName, unLock ? "成功" : "失败");
+                if (!unLock) {
+                    log.error("解锁key:[{}]失败", lockName);
+                    throw new UnLockException("解锁失败key:".concat(lockName));
+                }
             }
         }
-        return result;
     }
+
+
+    abstract Lock getLock(String lockName);
+
+    abstract boolean tryLock(Lock lock) throws Exception;
+
+    protected abstract boolean tryLock(Lock lock, long waitTime) throws Exception;
+
+    abstract boolean unLock(Lock lock) throws Exception;
 }
