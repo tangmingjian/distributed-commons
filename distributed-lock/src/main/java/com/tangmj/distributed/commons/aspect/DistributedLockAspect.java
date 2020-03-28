@@ -1,5 +1,7 @@
 package com.tangmj.distributed.commons.aspect;
 
+import com.tangmj.distributed.commons.DistributedLockService;
+import com.tangmj.distributed.commons.MLock;
 import com.tangmj.distributed.commons.annotition.DistributedLock;
 import com.tangmj.distributed.commons.exceptions.LockException;
 import com.tangmj.distributed.commons.exceptions.UnLockException;
@@ -9,6 +11,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -24,7 +27,10 @@ import java.lang.reflect.Method;
 @Aspect
 @Slf4j
 @Order(Integer.MIN_VALUE)
-public abstract class DistributedLockAspect<Lock> {
+public class DistributedLockAspect {
+
+    @Autowired
+    private DistributedLockService distributedLockService;
 
     @Pointcut("@annotation(com.tangmj.distributed.commons.annotition.DistributedLock)")
     public void pointcut() {
@@ -45,6 +51,7 @@ public abstract class DistributedLockAspect<Lock> {
         for (int i = 0; i < parameterNames.length; i++) {
             context.setVariable(parameterNames[i], args[i]);
         }
+        context.setVariable("target", pjp.getTarget());
         final Object value = expression.getValue(context);
         String lockName = prefix.concat(String.valueOf(value));
         if (lockName == null) {
@@ -53,14 +60,14 @@ public abstract class DistributedLockAspect<Lock> {
         }
         final long waitTime = lockAnnotation.waitTimeSeconds();
 
-        Lock lock = null;
+        MLock lock = null;
         boolean locked = false;
         try {
-            lock = getLock(lockName);
+            lock = distributedLockService.getLock(lockName);
             if (waitTime == 0) {
-                locked = tryLock(lock);
+                locked = distributedLockService.tryLock(lock);
             } else {
-                locked = tryLock(lock, waitTime);
+                locked = distributedLockService.tryLock(lock, waitTime);
             }
 
             log.info("加锁key:[{}]结果:[{}]", lockName, locked ? "成功" : "失败");
@@ -73,7 +80,7 @@ public abstract class DistributedLockAspect<Lock> {
         } finally {
             if (locked) {
                 //释放锁
-                final boolean unLock = unLock(lock);
+                final boolean unLock = distributedLockService.unLock(lock);
                 log.info("解锁key:[{}]结果:[{}]", lockName, unLock ? "成功" : "失败");
                 if (!unLock) {
                     log.error("解锁key:[{}]失败", lockName);
@@ -82,13 +89,4 @@ public abstract class DistributedLockAspect<Lock> {
             }
         }
     }
-
-
-    abstract Lock getLock(String lockName);
-
-    abstract boolean tryLock(Lock lock) throws Exception;
-
-    protected abstract boolean tryLock(Lock lock, long waitTime) throws Exception;
-
-    abstract boolean unLock(Lock lock) throws Exception;
 }

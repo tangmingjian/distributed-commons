@@ -12,7 +12,7 @@
 * [zookeeper Curator](http://curator.apache.org/getting-started.html) 
 
 ### 本项目使用     
-   1.引入jar  
+1.引入jar  
    ```xml
         <dependency>
             <groupId>com.tangmj.distributed.commons</groupId>
@@ -20,7 +20,7 @@
             <version>${version}</version>
         </dependency>
    ```
-   2.分布式锁中间件选择(redis/zookeeper)  
+2.分布式锁中间件选择(redis/zookeeper)  
    ```properties
     ##选用redis做锁
     com.tangmj.distributed.commons.distributed.lock.type=redis  
@@ -35,14 +35,35 @@
     
    ```
     
-   3.使用  
-    在需要加锁的方法上加DistributedLock注解，el表达式定义key
+3.使用  
+   
+   3.1 注解使用  
+   在需要加锁的方法上加DistributedLock注解，el表达式定义key
     
    ```java
     @Override
         @DistributedLock(key = "#user.userId", prefix = "ACCOUNT:DISTRIBUTEDLOCK:USER")
         public Object handle(User user) {
            
+        }
+        //@DistributedLock(key = "#target.method()+'_'+#a+'_'+#b",prefix = "PREFIX:")
+        //target是加锁方法所在对象的实例,可以用来调用方法
+   ```
+   3.2 接口使用  
+   ```java
+        @Autowired
+        private DistributedLockService distributedLockService;
+    
+        public void lock() throws Exception {
+            final MLock lock = distributedLockService.getLock("lock_name");
+            boolean locked = false;
+            try {
+                locked = distributedLockService.tryLock(lock);
+            } finally {
+                if (locked) {
+                    boolean unLocked = distributedLockService.unLock(lock);
+                }
+            }
         }
    ```
 

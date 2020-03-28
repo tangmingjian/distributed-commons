@@ -25,6 +25,7 @@ public @interface DistributedLock {
 
     /**
      * 获锁等待时间
+     *
      * @return
      */
     long waitTimeSeconds() default 0L;

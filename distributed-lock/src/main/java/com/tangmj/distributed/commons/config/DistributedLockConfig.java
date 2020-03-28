@@ -1,8 +1,9 @@
 package com.tangmj.distributed.commons.config;
 
+import com.tangmj.distributed.commons.DistributedLockService;
+import com.tangmj.distributed.commons.RedisDistributedLockService;
+import com.tangmj.distributed.commons.ZookeeperDistributedLockService;
 import com.tangmj.distributed.commons.aspect.DistributedLockAspect;
-import com.tangmj.distributed.commons.aspect.RedisDistributedLockAspect;
-import com.tangmj.distributed.commons.aspect.ZookeeperDistributedLockAspect;
 import com.tangmj.distributed.commons.conditions.RedisCondition;
 import com.tangmj.distributed.commons.conditions.ZkCondition;
 import org.apache.curator.framework.CuratorFramework;
@@ -12,13 +13,10 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,19 +29,6 @@ import java.util.stream.Collectors;
 public class DistributedLockConfig {
 
     @Bean
-    @ConditionalOnMissingBean(RedisTemplate.class)
-    @Conditional(RedisCondition.class)
-    public RedisTemplate redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate redisTemplate = new RedisTemplate();
-        redisTemplate.setConnectionFactory(redisConnectionFactory);
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.afterPropertiesSet();
-        return redisTemplate;
-    }
-
-
-    @Bean
     @Conditional(ZkCondition.class)
     public CuratorFramework curatorFramework(@Value("${zk.connectString}") String connectString, @Value("${zk.sessionTimeout:5000}") int sessionTimeoutMs) {
         final CuratorFramework cf = CuratorFrameworkFactory.builder()
@@ -54,12 +39,12 @@ public class DistributedLockConfig {
         cf.start();
         return cf;
     }
+
     @Bean
     @Conditional(ZkCondition.class)
-    public DistributedLockAspect zkDistributedLockAspect() {
-        return new ZookeeperDistributedLockAspect();
+    public ZookeeperDistributedLockService zookeeperDistributedLockService() {
+        return new ZookeeperDistributedLockService();
     }
-
 
 
     @Bean
@@ -78,8 +63,14 @@ public class DistributedLockConfig {
 
     @Bean
     @Conditional(RedisCondition.class)
-    public DistributedLockAspect redisDistributedLockAspect() {
-        return new RedisDistributedLockAspect();
+    public RedisDistributedLockService redisDistributedLockService() {
+        return new RedisDistributedLockService();
+    }
+
+    @Bean
+    @ConditionalOnBean(value = DistributedLockService.class)
+    public DistributedLockAspect distributedLockAspect() {
+        return new DistributedLockAspect();
     }
 
 }
