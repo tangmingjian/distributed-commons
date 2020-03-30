@@ -20,7 +20,7 @@
             <version>${version}</version>
         </dependency>
    ```
-2.分布式锁中间件选择(redis/zookeeper)  
+2.分布式锁中间件选择(redis/zookeeper/local)  
    ```properties
     ##选用redis做锁
     com.tangmj.distributed.commons.distributed.lock.type=redis  
@@ -32,6 +32,8 @@
     #zk地址  
     #zk.connectString=zk.gpayintra.com:2182,zk.gpayintra.com:2183  
 
+    ##选用ReentrantLock做本地锁，方便单体应用和分布式应用无感切换
+    #com.tangmj.distributed.commons.distributed.lock.type=local  
     
    ```
     

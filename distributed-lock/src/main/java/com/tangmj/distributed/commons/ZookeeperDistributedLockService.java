@@ -3,6 +3,7 @@ package com.tangmj.distributed.commons;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 
 import java.util.concurrent.TimeUnit;
 
@@ -16,6 +17,7 @@ public class ZookeeperDistributedLockService implements DistributedLockService<I
 
     @Override
     public MLock<InterProcessMutex> getLock(String lockName) {
+        Assert.notNull(lockName, "'lockName' must not be null");
         final InterProcessMutex mutex = new InterProcessMutex(zkClient, ROOT_PATH + lockName);
         return new MLock<>(mutex);
     }

@@ -3,6 +3,7 @@ package com.tangmj.distributed.commons;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 
 import java.util.concurrent.TimeUnit;
 
@@ -15,6 +16,7 @@ public class RedisDistributedLockService implements DistributedLockService<RLock
 
     @Override
     public MLock<RLock> getLock(String lockName) {
+        Assert.notNull(lockName, "'lockName' must not be null");
         final RLock lock = redissonClient.getLock(lockName);
         return new MLock(lock);
     }

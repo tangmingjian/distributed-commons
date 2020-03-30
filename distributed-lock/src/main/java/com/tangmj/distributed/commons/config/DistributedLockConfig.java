@@ -1,9 +1,11 @@
 package com.tangmj.distributed.commons.config;
 
 import com.tangmj.distributed.commons.DistributedLockService;
+import com.tangmj.distributed.commons.LocalDistributedLockService;
 import com.tangmj.distributed.commons.RedisDistributedLockService;
 import com.tangmj.distributed.commons.ZookeeperDistributedLockService;
 import com.tangmj.distributed.commons.aspect.DistributedLockAspect;
+import com.tangmj.distributed.commons.conditions.LocalCondition;
 import com.tangmj.distributed.commons.conditions.RedisCondition;
 import com.tangmj.distributed.commons.conditions.ZkCondition;
 import org.apache.curator.framework.CuratorFramework;
@@ -65,6 +67,12 @@ public class DistributedLockConfig {
     @Conditional(RedisCondition.class)
     public RedisDistributedLockService redisDistributedLockService() {
         return new RedisDistributedLockService();
+    }
+
+    @Bean
+    @Conditional(LocalCondition.class)
+    public LocalDistributedLockService localDistributedLockService() {
+        return new LocalDistributedLockService();
     }
 
     @Bean
