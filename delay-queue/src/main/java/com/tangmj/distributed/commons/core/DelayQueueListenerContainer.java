@@ -31,7 +31,8 @@ public class DelayQueueListenerContainer implements SmartLifecycle {
                 30,
                 TimeUnit.MINUTES,
                 new SynchronousQueue(),
-                new DelayQueueThreadFactory(queueName())
+                new DelayQueueThreadFactory(queueName()),
+                new ThreadPoolExecutor.CallerRunsPolicy()
         );
         startListener();
         setRunning(true);
@@ -43,7 +44,7 @@ public class DelayQueueListenerContainer implements SmartLifecycle {
                 try {
                     final Object message = distinationQueue.take();
                     threadPool.submit(() -> handleMessage(message));
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     log.error("获取延时任务异常", e);
                 }
             }
@@ -53,7 +54,7 @@ public class DelayQueueListenerContainer implements SmartLifecycle {
 
     private void handleMessage(Object message) {
         try {
-            MDC.put("UUID",UUID.randomUUID().toString());
+            MDC.put("UUID", UUID.randomUUID().toString());
             listener.onMessage(message);
             MDC.remove("UUID");
         } catch (Exception e) {

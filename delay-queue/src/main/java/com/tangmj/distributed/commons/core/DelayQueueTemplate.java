@@ -27,6 +27,7 @@ public class DelayQueueTemplate<M> {
             final RBlockingDeque<M> distinationQueue = redissonClient.getBlockingDeque(queueName, new JsonJacksonCodec());
             final RDelayedQueue<M> delayedQueue = redissonClient.getDelayedQueue(distinationQueue);
             delayedQueue.offer(msg, delay, timeUnit);
+            delayedQueue.destroy();
         } catch (Exception e) {
             log.error("延迟队列入队失败", e);
             return false;
