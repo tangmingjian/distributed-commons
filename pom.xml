@@ -16,6 +16,7 @@
     <version>1.0.0-SNAPSHOT</version>
     <modules>
         <module>distributed-lock</module>
+        <module>delay-queue</module>
     </modules>
 
     <name>distributed-commons</name>
