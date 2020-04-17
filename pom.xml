@@ -17,6 +17,7 @@
     <modules>
         <module>distributed-lock</module>
         <module>delay-queue</module>
+        <module>common</module>
     </modules>
 
     <name>distributed-commons</name>
@@ -24,6 +25,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <redisson-version>3.11.0</redisson-version>
         <project.scm.type>git</project.scm.type>
         <project.scm.path>https://github.com/tangmingjian/distributed-commons.git</project.scm.path>
     </properties>

@@ -9,33 +9,19 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>delay-queue</artifactId>
+    <artifactId>common</artifactId>
 
-    <name>delay-queue</name>
-
-    <properties>
-        <spring-messaging.version>5.1.0.RELEASE</spring-messaging.version>
-    </properties>
+    <name>common</name>
 
     <dependencies>
-        <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson-spring-boot-starter</artifactId>
-            <version>${redisson-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-messaging</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>com.tangmj.distributed.commons</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+            <version>${redisson-version}</version>
         </dependency>
     </dependencies>
 </project>

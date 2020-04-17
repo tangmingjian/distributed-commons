@@ -2,7 +2,6 @@ package com.tangmj.distributed.commons.core;
 
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
-import org.redisson.codec.JsonJacksonCodec;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +45,7 @@ public class DelayQueueListenerRegistry implements ApplicationContextAware, Smar
         GenericApplicationContext genericApplicationContext = (GenericApplicationContext) applicationContext;
 
         genericApplicationContext.registerBean(containerBeanName, DelayQueueListenerContainer.class,
-                () -> createListenerContainer(containerBeanName, delayQueueListener));
+                () -> createListenerContainer(containerBeanName, delayQueueListener), bd -> bd.setDestroyMethodName("stop"));
         DelayQueueListenerContainer container = genericApplicationContext.getBean(containerBeanName,
                 DelayQueueListenerContainer.class);
         if (!container.isRunning()) {
@@ -61,7 +60,7 @@ public class DelayQueueListenerRegistry implements ApplicationContextAware, Smar
 
     private DelayQueueListenerContainer createListenerContainer(String containerBeanName, DelayQueueListener delayQueueListener) {
         DelayQueueListenerContainer delayQueueListenerContainer = new DelayQueueListenerContainer();
-        delayQueueListenerContainer.setDistinationQueue(redissonClient.getBlockingDeque(delayQueueListener.queueName(), new JsonJacksonCodec()));
+        delayQueueListenerContainer.setDistinationQueue(redissonClient.getBlockingDeque(delayQueueListener.queueName()));
         delayQueueListenerContainer.setListener(delayQueueListener);
         return delayQueueListenerContainer;
     }

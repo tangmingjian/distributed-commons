@@ -23,9 +23,18 @@
 2.分布式锁中间件选择(redis/zookeeper/local)  
    ```properties
     ##选用redis做锁
-    com.tangmj.distributed.commons.distributed.lock.type=redis  
-    #redisson集群配置  
-    redisson.node.address=10.103.22.105:7001,10.103.22.105:7004,10.103.22.106:7002,10.103.22.106:7005,10.103.22.107:7003,10.103.22.107:7006      
+    com.tangmj.distributed.commons.distributed.lock.type=redis
+
+    ##redisson配置
+        #redisson单机配置  
+        redisson.address=localhost:6379
+    
+        ##redisson哨兵配置  
+        #redisson.masterName=masterName
+        #redisson.sentinelAddresses=ip1:port1,ip1:port2,ip1:port3
+    
+        ##redisson集群配置  
+        #redisson.nodeAddresses=ip1:port1,ip1:port2,ip2:port1,ip2:port2,ip3:port1,ip3:port2
 
     ##选用zookeeper做锁  
     #com.tangmj.distributed.commons.distributed.lock.type=zookeeper   

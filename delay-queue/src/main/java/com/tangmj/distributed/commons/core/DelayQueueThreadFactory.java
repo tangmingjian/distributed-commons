@@ -16,7 +16,7 @@ public class DelayQueueThreadFactory implements ThreadFactory {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() :
                 Thread.currentThread().getThreadGroup();
-        namePrefix = queueName+"pool-" +
+        namePrefix = queueName + "pool-" +
                 poolNumber.getAndIncrement() +
                 "-thread-";
     }

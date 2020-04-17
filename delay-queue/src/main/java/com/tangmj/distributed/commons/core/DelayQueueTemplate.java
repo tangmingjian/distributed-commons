@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBlockingDeque;
 import org.redisson.api.RDelayedQueue;
 import org.redisson.api.RedissonClient;
-import org.redisson.codec.JsonJacksonCodec;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.TimeUnit;
@@ -24,7 +23,7 @@ public class DelayQueueTemplate<M> {
 
     public boolean offer(String queueName, M msg, long delay, TimeUnit timeUnit) {
         try {
-            final RBlockingDeque<M> distinationQueue = redissonClient.getBlockingDeque(queueName, new JsonJacksonCodec());
+            final RBlockingDeque<M> distinationQueue = redissonClient.getBlockingDeque(queueName);
             final RDelayedQueue<M> delayedQueue = redissonClient.getDelayedQueue(distinationQueue);
             delayedQueue.offer(msg, delay, timeUnit);
             delayedQueue.destroy();

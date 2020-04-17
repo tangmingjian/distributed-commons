@@ -21,8 +21,8 @@ public class DelayQueueListenerContainer implements SmartLifecycle {
     private RBlockingDeque<Object> distinationQueue;
     private DelayQueueListener listener;
     private boolean running;
-    ExecutorService threadPool;
-
+    private ExecutorService threadPool;
+    private volatile boolean stop = false;
 
     @Override
     public void start() {
@@ -40,7 +40,7 @@ public class DelayQueueListenerContainer implements SmartLifecycle {
 
     private void startListener() {
         new Thread(() -> {
-            while (true) {
+            while (!stop) {
                 try {
                     final Object message = distinationQueue.take();
                     threadPool.submit(() -> handleMessage(message));
@@ -49,7 +49,6 @@ public class DelayQueueListenerContainer implements SmartLifecycle {
                 }
             }
         }).start();
-
     }
 
     private void handleMessage(Object message) {
@@ -64,7 +63,7 @@ public class DelayQueueListenerContainer implements SmartLifecycle {
 
     @Override
     public void stop() {
-
+        stop = true;
     }
 
     @Override

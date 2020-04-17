@@ -33,8 +33,15 @@
 2. 配置redisson
 
     ```properties
-        #redisson集群配置  
-        redisson.node.address=redis集群地址      
+        #redisson单机配置  
+        redisson.address=localhost:6379
+    
+        ##redisson哨兵配置  
+        #redisson.masterName=masterName
+        #redisson.sentinelAddresses=ip1:port1,ip1:port2,ip1:port3
+
+        ##redisson集群配置  
+        #redisson.nodeAddresses=ip1:port1,ip1:port2,ip2:port1,ip2:port2,ip3:port1,ip3:port2
     ```
   
 3. 引入DelayQueueTemplate

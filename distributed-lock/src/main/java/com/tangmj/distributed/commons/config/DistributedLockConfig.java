@@ -8,27 +8,22 @@ import com.tangmj.distributed.commons.aspect.DistributedLockAspect;
 import com.tangmj.distributed.commons.conditions.LocalCondition;
 import com.tangmj.distributed.commons.conditions.RedisCondition;
 import com.tangmj.distributed.commons.conditions.ZkCondition;
+import com.tangmj.distributed.commons.redisson.RedissonConfig;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
  * @author tangmingjian 2020-03-08 下午6:49
  **/
 @Configuration
-public class DistributedLockConfig {
+public class DistributedLockConfig extends RedissonConfig {
 
     @Bean
     @Conditional(ZkCondition.class)
@@ -49,18 +44,22 @@ public class DistributedLockConfig {
     }
 
 
-    @Bean
+    @Override
     @Conditional(RedisCondition.class)
-    public RedissonClient redissonClient(@Value("${redisson.node.address}") String redissonNodeAddress) {
-        Config config = new Config();
-        final String[] nodes = redissonNodeAddress.split(",");
-        final List<String> collect = Arrays.stream(nodes).map(s -> "redis://".concat(s)).collect(Collectors.toList());
-        config.useClusterServers()
-                .setScanInterval(2000) // 集群状态扫描间隔时间，单位是毫秒
-                //可以用"rediss://"来启用SSL连接
-                //.addNodeAddress("redis://127.0.0.1:7000", "redis://127.0.0.1:7001")
-                .addNodeAddress(collect.toArray(new String[]{}));
-        return Redisson.create(config);
+    public RedissonClient redissonSingle() {
+        return super.redissonSingle();
+    }
+
+    @Override
+    @Conditional(RedisCondition.class)
+    public RedissonClient redissonSentinel() {
+        return super.redissonSentinel();
+    }
+
+    @Override
+    @Conditional(RedisCondition.class)
+    public RedissonClient redissonCluster() {
+        return super.redissonCluster();
     }
 
     @Bean
