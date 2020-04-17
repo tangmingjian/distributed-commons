@@ -1,6 +1,5 @@
 package com.tangmj.distributed.commons.redisson;
 
-import io.micrometer.core.instrument.util.StringUtils;
 import lombok.Data;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -15,6 +14,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
 /**
  * @author tangmingjian 2020-04-16 下午4:04
@@ -38,7 +38,7 @@ public class RedissonConfig {
                 .setConnectionPoolSize(redissonProperties.getConnectionPoolSize())
                 .setConnectionMinimumIdleSize(redissonProperties.getConnectionMinimumIdleSize());
 
-        if (StringUtils.isNotBlank(redissonProperties.getPassword())) {
+        if (!StringUtils.isEmpty(redissonProperties.getPassword())) {
             serverConfig.setPassword(redissonProperties.getPassword());
         }
         config.setCodec(new JsonJacksonCodec());
@@ -59,7 +59,7 @@ public class RedissonConfig {
                 .setMasterConnectionPoolSize(redissonProperties.getMasterConnectionPoolSize())
                 .setSlaveConnectionPoolSize(redissonProperties.getSlaveConnectionPoolSize());
 
-        if (StringUtils.isNotBlank(redissonProperties.getPassword())) {
+        if (!StringUtils.isEmpty(redissonProperties.getPassword())) {
             serverConfig.setPassword(redissonProperties.getPassword());
         }
         config.setCodec(new JsonJacksonCodec());
@@ -79,7 +79,7 @@ public class RedissonConfig {
                 .setMasterConnectionPoolSize(redissonProperties.getMasterConnectionPoolSize())
                 .setSlaveConnectionPoolSize(redissonProperties.getSlaveConnectionPoolSize());
 
-        if (StringUtils.isNotBlank(redissonProperties.getPassword())) {
+        if (!StringUtils.isEmpty(redissonProperties.getPassword())) {
             clusterServersConfig.setPassword(redissonProperties.getPassword());
         }
         config.setCodec(new JsonJacksonCodec());
