@@ -19,7 +19,7 @@ public class DelayQueueListenerBeanProcessor implements BeanPostProcessor {
 
     @Nullable
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof DelayQueueListener) {
             this.delayQueueListenerRegistry.registerListener((DelayQueueListener) bean);
         }
